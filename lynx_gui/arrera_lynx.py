@@ -4,24 +4,19 @@ from librairy.travailJSON import *
 from gestionnaire.gestion import gestionnaire
 import threading as th
 
-class arrera_lynx(aTk):
-    def __init__(self,gest:gestionnaire,conf_file:str,theme_file:str):
+class arrera_lynx(aFrame):
+    def __init__(self,master:aTk,gest:gestionnaire,conf_file:str,fnc_end:Callable):
         self.__json_file = jsonWork(conf_file)
-        os = gest.getOSObjet()
-        if os.osLinux() or os.osMac():
-            icon = self.__json_file.getContentJsonFlag("icon_unix")
-        else :
-            icon = self.__json_file.getContentJsonFlag("icon_win")
+        self.__master = master
 
         self.__assistant_name = gest.getName()
         self.__gestUser = gest.getUserConf()
         self.__arrVoice = gest.getArrVoice()
         self.__gestionnaire = gest
 
-        super().__init__(title=f"{self.__assistant_name} : Configuration",
-                         width=800,height=500,resizable=False,
-                         theme_file=theme_file,
-                         icon=icon)
+        self.__fnc_end = fnc_end
+
+        super().__init__(master,width=800,height=500)
 
         # Var
         self.__nb_soft_add = 0
@@ -49,10 +44,13 @@ class arrera_lynx(aTk):
         self.__work_folder_setted = False
         self.__download_folder_setted = False
 
-        # Placement
+    def active(self):
+        self.__master.configure(width=800,height=500,resizable=False)
+        self.placeCenter()
         self.__welcome.placeCenter()
 
-        self.mainloop()
+    def get_geometry(self):
+        return "800x500+5+30"
 
     # Declaration de la tout les pages
     def __welcome_frame(self):
@@ -77,7 +75,7 @@ class arrera_lynx(aTk):
         listGenre = self.__json_file.getFlagListJson("list_genre")
 
         m = aFrame(self,width=775,height=475)
-        info = aFrame(m,width=350,height=200)
+        info = aFrame(m,width=350,height=200,fg_color=m.cget("fg_color"))
         lTitle = aLabel(m,text="Information de l'utilisateur",police_size=25)
         lDesc = aLabel(m,police_size=20,
                        text="Pour apprendre à vous connaître, l'assistant a besoin de savoir votre nom, prénom et le pronom que vous voulez qu'il utilise",
@@ -105,7 +103,7 @@ class arrera_lynx(aTk):
         lTitle = aLabel(m,text="Paramètres de mobilité",police_size=25)
         btn = aButton(m,text="Continuer",size=20,command=self.__after_mobility)
 
-        fMeteo = aFrame(m,width=365 ,height=300)
+        fMeteo = aFrame(m,width=365 ,height=300,fg_color=m.cget("fg_color"))
         ltMeteo = aLabel(fMeteo,text="Météo",police_size=20)
         self.__eMDomicile = aEntryLengend(fMeteo,text="Ville de domicile",
                                           police_size=15)
@@ -114,7 +112,7 @@ class arrera_lynx(aTk):
         btnATown = aButton(fMeteo, text="Ajouter une ville", size=20,
                            command=self.__action_view_add_town)
 
-        fGPS = aFrame(m,width=365,height=300)
+        fGPS = aFrame(m,width=365,height=300,fg_color=m.cget("fg_color"))
         ltGPS = aLabel(fGPS, text="GPS", police_size=20)
         self.__eGDomicile = aEntryLengend(fGPS, text="Adresse de domicile",
                                           police_size=15,width=175)
@@ -143,13 +141,13 @@ class arrera_lynx(aTk):
 
         lTitle = aLabel(m,text="Paramètres d'environnement numérique",police_size=25)
 
-        fWeb = aFrame(m,width=350,height=200)
+        fWeb = aFrame(m,width=350,height=200,fg_color=m.cget("fg_color"))
         lTWeb = aLabel(fWeb,police_size=20,text="Raccourci internet")
         self.__eWebName = aEntryLengend(fWeb,text="Nom",police_size=15)
         self.__eWebLink = aEntryLengend(fWeb,text="Lien",police_size=15)
         btnWeb = aButton(fWeb,text="Ajouter",size=20,command=self.__action_add_web_shortcut)
 
-        fSoft = aFrame(m,width=350,height=200)
+        fSoft = aFrame(m,width=350,height=200,fg_color=m.cget("fg_color"))
         lTSoft = aLabel(fSoft,police_size=20,text="Logiciel externe")
         self.__eSoftName = aEntryLengend(fSoft,text="Nom",police_size=15)
         btnSoft = aButton(fSoft,text="Ajouter",size=20,command=self.__action_add_soft)
@@ -184,7 +182,7 @@ class arrera_lynx(aTk):
                        ,wraplength=300,justify="left",police_size=20)
 
         listEngine = self.__json_file.getFlagListJson("list_engine_search")
-        fSearch = aFrame(m,width=258,height=200)
+        fSearch = aFrame(m,width=258,height=200,fg_color=m.cget("fg_color"))
         lTSearch = aLabel(fSearch,police_size=20,text="Moteur de recherche\npar défaut")
         self.__mSearchEngine = aOptionMenu(fSearch,value=listEngine)
 
@@ -203,13 +201,13 @@ class arrera_lynx(aTk):
 
         lTitle = aLabel(m,text="Paramètres généraux de l'assistant",police_size=25)
 
-        fSystem = aFrame(m,width=350,height=200)
+        fSystem = aFrame(m,width=350,height=200,fg_color=m.cget("fg_color"))
         lTSysteme = aLabel(fSystem,police_size=20,text="Paramétrage de l'assistant")
         self.__enableHist = aSwicht(fSystem,text="Activer l'historique",default_value=False,
                                      command=self.__action_btn_enable_hist)
 
         if self.__json_file.getContentJsonFlag("micro_use") == "1":
-            fMicro = aFrame(m,width=350,height=200)
+            fMicro = aFrame(m,width=350,height=200,fg_color=m.cget("fg_color"))
             lTMicro = aLabel(fMicro,police_size=20,text="Microphone")
             self.__enableSound = aSwicht(fMicro,text="Sons au démarrage de l'écoute",default_value=False,
                                          command=self.__action_btn_enable_micro_sound)
@@ -239,12 +237,12 @@ class arrera_lynx(aTk):
         m = aFrame(self,width=775,height=475)
         lTitle = aLabel(m,text="Paramétrage des dossiers",police_size=25)
 
-        fWork = aFrame(m,width=350,height=200)
+        fWork = aFrame(m,width=350,height=200,fg_color=m.cget("fg_color"))
         lTWork = aLabel(fWork,police_size=20,text="Dossier de travail")
         bFWork = aButton(fWork,text="Enregistrer les dossiers\nde travail",
                          size=20,command=self.__action_add_work_folder)
 
-        fDownload = aFrame(m,width=350,height=200)
+        fDownload = aFrame(m,width=350,height=200,fg_color=m.cget("fg_color"))
         lTDownload = aLabel(fDownload,police_size=20,text="Dossier de téléchargement")
         bFDownload = aButton(fDownload, text="Enregistrer le dossier\nde téléchargement",
                              size=20, command=self.__action_add_download_folder)
@@ -274,7 +272,7 @@ class arrera_lynx(aTk):
         lDesc = aLabel(m,text="Pour utiliser toutes les fonctionnalités de codehelp vous devez enregistrer votre token github. (Stocké entièrement en local)",
                        wraplength=300,justify="left",police_size=20)
 
-        fToken = aFrame(m,width=300,height=300)
+        fToken = aFrame(m,width=300,height=300,fg_color=m.cget("fg_color"))
         lToken = aLabel(fToken,police_size=20,text="Enregistrement du token")
         self.__eToken = aEntryLengend(fToken,text="Token",police_size=15)
         btnGenerateToken = aButton(fToken,text="Générer un token",size=20,
@@ -302,7 +300,7 @@ class arrera_lynx(aTk):
         lTitle = aLabel(m,police_size=25,text="Paramétrage du mode IA")
         btn = aButton(m,text="Continuer",size=20,command=self.__after_ia)
 
-        fChooseModel = aFrame(m,width=350,height=237)
+        fChooseModel = aFrame(m,width=350,height=237,fg_color=m.cget("fg_color"))
         lTModel = aLabel(fChooseModel,police_size=20,text="Choix du modèle d'IA")
         bDModel = aButton(fChooseModel,text="Choisir un modèle\nà télécharger",size=20,
                           command=self.__action_view_download_model)
@@ -511,9 +509,9 @@ class arrera_lynx(aTk):
             self.__ia.placeCenter()
 
     def __after_end(self):
-        self.destroy()
         self.__gestionnaire.getLanguageObjet().setVarUser()
-
+        self.__fnc_end()
+        del self
     # Action
 
     # Mobility
