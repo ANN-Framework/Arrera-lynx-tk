@@ -2,6 +2,7 @@ from librairy.travailJSON import *
 from gestionnaire.gestion import gestionnaire
 from tkinter import filedialog,messagebox
 import os
+import shutil
 
 DICTUSER = {
     "firstname-user":"",
@@ -33,16 +34,18 @@ class gestUserSetting:
         # Mise en place du chemin du fichier de configuration utilisateur
         if self.__osDect.osLinux() or self.__osDect.osMac():
             home = os.path.expanduser("~")
-            self.__userSettingPath = str(home)+"/.config/arrera-assistant/user-config.json"
-            self.__userTaskPath = str(home)+"/.config/arrera-assistant/user-task.json"
-            self.__userHistoriquePath = str(home)+"/.config/arrera-assistant/user-hist.json"
-            self.__userEventPath = str(home)+"/.config/arrera-assistant/user-event.json"
+            self.__conf_folder = str(home)+"/.config/arrera-assistant/"
+            self.__userSettingPath = self.__conf_folder+"user-config.json"
+            self.__userTaskPath = self.__conf_folder+"user-task.json"
+            self.__userHistoriquePath = self.__conf_folder+"user-hist.json"
+            self.__userEventPath = self.__conf_folder+"user-event.json"
         elif self.__osDect.osWindows():
             home = os.path.join(os.path.expanduser("~"), "AppData", "Roaming")
-            self.__userSettingPath = str(home)+"/arrera-assistant/user-config.json"
-            self.__userTaskPath = str(home)+"/arrera-assistant/user-task.json"
-            self.__userHistoriquePath = str(home)+"/arrera-assistant/user-hist.json"
-            self.__userEventPath = str(home)+"/arrera-assistant/user-event.json"
+            self.__conf_folder = str(home)+"/arrera-assistant/"
+            self.__userSettingPath = self.__conf_folder+"user-config.json"
+            self.__userTaskPath = self.__conf_folder+"user-task.json"
+            self.__userHistoriquePath = self.__conf_folder+"user-hist.json"
+            self.__userEventPath = self.__conf_folder+"user-event.json"
         else :
             self.__userSettingPath = None
 
@@ -69,6 +72,17 @@ class gestUserSetting:
 
         # Chargement du fichier de configuration utilisateur
         self.__fileUser = jsonWork(self.__userSettingPath)
+
+    def del_conf_folder(self):
+        try:
+            shutil.rmtree(self.__conf_folder)
+            return True
+        except FileNotFoundError:
+            return False
+        except PermissionError:
+            return False
+        except Exception as e:
+            return False
 
     def getFirstRun(self):
         return self.__firstRun

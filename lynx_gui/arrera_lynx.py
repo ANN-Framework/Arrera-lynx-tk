@@ -44,7 +44,12 @@ class arrera_lynx(aFrame):
         self.__work_folder_setted = False
         self.__download_folder_setted = False
 
+    def __close(self):
+        self.__gestionnaire.getUserConf().del_conf_folder()
+        self.master.destroy()
+
     def active(self):
+        self.__master.protocol("WM_DELETE_WINDOW", self.__close)
         self.__master.configure(width=800,height=500,resizable=False)
         self.placeCenter()
         self.__welcome.placeCenter()
